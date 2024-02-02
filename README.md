@@ -3,6 +3,8 @@
 **Personal Discord:** @bwobrown
 **Discord Server:** https://discord.gg/HfaEmyucxB 
 
+**Preview Video:** https://youtu.be/yEffOTHynuI
+
 An all in one Advanced Job Garage System for QBCore & ESX
 
 **Compatibility:**
