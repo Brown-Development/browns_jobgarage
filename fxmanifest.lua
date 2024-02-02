@@ -22,7 +22,8 @@ shared_scripts {
 files {
     'ui/*.html',
     'ui/*.css',
-    'ui/*.js'
+    'ui/*.js',
+    'ui/svg/*.svg'
 }
 
 ui_page 'ui/index.html'
