@@ -1,5 +1,7 @@
 # IF YOU LIKE THIS SCRIPT CHECK OUT MY TEBEX: https://brown-development.tebex.io/
 
+# DO NOT CHANGE THE NAME OF THIS SCRIPT (THINGS WILL BREAK)
+
 **Personal Discord:** @bwobrown
 **Discord Server:** https://discord.gg/HfaEmyucxB 
 
