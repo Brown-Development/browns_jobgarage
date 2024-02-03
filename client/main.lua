@@ -580,7 +580,7 @@ function ViewThMenu(name)
                         type = 'hide_progress'
                     })
 
-                    Vehicle = CreateVehicle(model, table.unpack({garage[name].location.displayCoords}), garage[name].location.displayHeading, true, false)
+                    Vehicle = CreateVehicle(model, table.unpack({garage[name].location.displayCoords}), garage[name].location.displayHeading, false, false)
 
                     while not DoesEntityExist(Vehicle) do 
                         Citizen.Wait(0)
@@ -932,7 +932,7 @@ RegisterNUICallback('Continue', function()
         Citizen.Wait(0)
     end
 
-    local veh = CreateVehicle(model, table.unpack({garage[thisJob].location.spawnCoords}), false, false)
+    local veh = CreateVehicle(model, table.unpack({garage[thisJob].location.spawnCoords}), true, false)
 
     while not DoesEntityExist(veh) do 
         Citizen.Wait(0)
