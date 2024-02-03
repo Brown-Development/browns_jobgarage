@@ -163,6 +163,9 @@ $(document).ready(function () {
                     ResetAll()
                     $.post('http://browns_jobgarage/Continue')
                     $('#veh-sel').empty();
+                    let h1fix = document.createElement("h1")
+                    $(h1fix).text("Select Vehicle")
+                    $("#veh-sel").append(h1fix)
                 }, 200);
                 break
             case 'close':
@@ -179,6 +182,9 @@ $(document).ready(function () {
                     ResetAll()
                     $.post('http://browns_jobgarage/Close')
                     $('#veh-sel').empty();
+                    let h1fix = document.createElement("h1")
+                    $(h1fix).text("Select Vehicle")
+                    $("#veh-sel").append(h1fix)
                 }, 200);
                 break
             case 'takehome':
