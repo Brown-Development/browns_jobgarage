@@ -1,6 +1,6 @@
 # IF YOU LIKE THIS SCRIPT CHECK OUT MY TEBEX: https://brown-development.tebex.io/
 
-# DO NOT CHANGE THE NAME OF THIS SCRIPT (THINGS WILL BREAK)
+# MAKE SURE THE SCRIPT IS NAMED: browns_jobgarage NOT: browns_jobgarage-main OR ANYTHING ELSE (OR IT WILL BREAK)
 
 **Personal Discord:** @bwobrown
 **Discord Server:** https://discord.gg/HfaEmyucxB 
@@ -17,3 +17,9 @@ QBCore or ESX
 **Dependencies:**
 oxmysql
 ox_lib
+
+**Troubleshooting:**
+
+1. If you have an issue with nothing opening when you press "E" PLEASE make sure you have the LATEST release of ox_lib: (https://github.com/overextended/ox_lib/releases)
+
+2. ALWAYS Make sure ox_lib and oxmysql is started/ensured before this resource.
