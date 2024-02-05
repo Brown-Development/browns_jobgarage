@@ -20,13 +20,42 @@ AddEventHandler('onResourceStart', function(resourceName)
         ]])
 
         if settings.framework == 'esx' then 
-            exports.oxmysql:execute([[
-                ALTER TABLE `owned_vehicles` ADD COLUMN `takehome` VARCHAR(255) DEFAULT NULL
-            ]])
+            local checkColumnQuery = [[
+                SELECT COUNT(*)
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_NAME = 'owned_vehicles'
+                AND COLUMN_NAME = 'takehome'
+            ]]
+            
+            exports.oxmysql:scalar(checkColumnQuery, function(count)
+                if count == 0 then
+                    local addColumnQuery = [[
+                        ALTER TABLE `owned_vehicles`
+                        ADD COLUMN `takehome` VARCHAR(255) DEFAULT NULL
+                    ]]
+                    exports.oxmysql:execute(addColumnQuery)
+                end
+            end)
+
         elseif settings.framework == 'qb-core' then 
-            exports.oxmysql:execute([[
-                ALTER TABLE `player_vehicles` ADD COLUMN `takehome` VARCHAR(255) DEFAULT NULL
-            ]])
+
+            local checkColumnQuery = [[
+                SELECT COUNT(*)
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_NAME = 'player_vehicles'
+                AND COLUMN_NAME = 'takehome'
+            ]]
+            
+            exports.oxmysql:scalar(checkColumnQuery, function(count)
+                if count == 0 then
+                    local addColumnQuery = [[
+                        ALTER TABLE `player_vehicles`
+                        ADD COLUMN `takehome` VARCHAR(255) DEFAULT NULL
+                    ]]
+                    exports.oxmysql:execute(addColumnQuery)
+                end
+            end)
+            
         end
 
     end 
