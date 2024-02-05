@@ -11,6 +11,7 @@ local ControlSlide = false
 local doSlide = false
 local SaveThis = false
 local NuiOpen = false
+local Busy = false 
 
 local Materials = { 
     ['Classic'] = 0,
@@ -374,74 +375,78 @@ end
 
 function OpenMenu(name) 
 
-    local job, grade = lib.callback.await('browns:jg:server:GetJobInfo', false) 
-
-
-    if job ~= name then 
-        settings.notify('Job Garage', 'You can not access this', 'error', 5000)
-        return
-    end
-
-    thisJob = job 
-
-    for k, v in ipairs(garage[job].vehicles) do 
-        if grade >= v.grade then 
-            table.insert(vehicles, { 
-                model = v.model,
-                label = v.label
-            })
+    if not Busy then 
+        Busy = true 
+        
+        local job, grade = lib.callback.await('browns:jg:server:GetJobInfo', false) 
+    
+    
+        if job ~= name then 
+            settings.notify('Job Garage', 'You can not access this', 'error', 5000)
+            return
         end
-    end
-
-    local Trash = {}
-
-    SendNUIMessage({
-        type = 'progress'
-    })
-
-    for i, v in ipairs(vehicles) do 
-        local model = GetHashKey(v.model)
-        if IsModelInCdimage(model) then 
-            SendNUIMessage({
-                type = 'loading',
-                veh = v.label
-            })
-            RequestModel(model)
-            while not HasModelLoaded(model) do 
-                Citizen.Wait(0)
-                if config.debug then 
-                    print('Loading Vehicle:' .. " " .. v.label, "Model:" .. " " .. v.model)
-                end
+    
+        thisJob = job 
+    
+        for k, v in ipairs(garage[job].vehicles) do 
+            if grade >= v.grade then 
+                table.insert(vehicles, { 
+                    model = v.model,
+                    label = v.label
+                })
             end
-        else
-            print('Cant Load Vehicle (Not in CD Image):', v.label, v.model)
-            table.insert(Trash, {
-                vehicle = i
-            })
         end
+    
+        local Trash = {}
+    
+        SendNUIMessage({
+            type = 'progress'
+        })
+    
+        for i, v in ipairs(vehicles) do 
+            local model = GetHashKey(v.model)
+            if IsModelInCdimage(model) then 
+                SendNUIMessage({
+                    type = 'loading',
+                    veh = v.label
+                })
+                RequestModel(model)
+                while not HasModelLoaded(model) do 
+                    Citizen.Wait(0)
+                    if config.debug then 
+                        print('Loading Vehicle:' .. " " .. v.label, "Model:" .. " " .. v.model)
+                    end
+                end
+            else
+                print('Cant Load Vehicle (Not in CD Image):', v.label, v.model)
+                table.insert(Trash, {
+                    vehicle = i
+                })
+            end
+        end
+    
+        SendNUIMessage({
+            type = 'hide_progress'
+        })
+    
+        for _, trash in ipairs(Trash) do 
+            table.remove(vehicles, trash.vehicle)
+        end
+    
+        if not vehicles[1] then
+            settings.notify('Job Garage', 'There are no vehicles that you can access', 'error', 5000)
+            return 
+        end
+    
+        SetNuiFocus(true, true)
+    
+        local displayVeh = vehicles[1].model 
+    
+        CycleVehicle(displayVeh, job)
+    
+        SetEntityVisible(cache.ped, false, false) 
+        SetEntityInvincible(cache.ped, true) 
     end
-
-    SendNUIMessage({
-        type = 'hide_progress'
-    })
-
-    for _, trash in ipairs(Trash) do 
-        table.remove(vehicles, trash.vehicle)
-    end
-
-    if not vehicles[1] then
-        settings.notify('Job Garage', 'There are no vehicles that you can access', 'error', 5000)
-        return 
-    end
-
-    SetNuiFocus(true, true)
-
-    local displayVeh = vehicles[1].model 
-
-    CycleVehicle(displayVeh, job)
-
-    SetEntityVisible(cache.ped, false, false) 
-    SetEntityInvincible(cache.ped, true) 
 
 end
 
@@ -901,6 +906,7 @@ RegisterNUICallback('ChangeColor', function(data)
 end)
 
 RegisterNUICallback('Close', function() 
+    Busy = false
     NuiOpen = false
     SetEntityVisible(cache.ped, true, true)
     SetEntityInvincible(cache.ped, false)
@@ -917,6 +923,7 @@ RegisterNUICallback('Close', function()
 end)
 
 RegisterNUICallback('Continue', function() 
+    Busy = false
     NuiOpen = false
     local props = lib.getVehicleProperties(Vehicle) 
 
