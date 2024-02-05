@@ -21,11 +21,11 @@ AddEventHandler('onResourceStart', function(resourceName)
 
         if settings.framework == 'esx' then 
             exports.oxmysql:execute([[
-                ALTER TABLE owned_vehicles ADD COLUMN IF NOT EXISTS `takehome` VARCHAR(255) DEFAULT NULL
+                ALTER TABLE `owned_vehicles` ADD COLUMN IF NOT EXISTS `takehome` VARCHAR(255) DEFAULT NULL
             ]])
         elseif settings.framework == 'qb-core' then 
             exports.oxmysql:execute([[
-                ALTER TABLE player_vehicles ADD COLUMN IF NOT EXISTS `takehome` VARCHAR(255) DEFAULT NULL
+                ALTER TABLE `player_vehicles` ADD COLUMN IF NOT EXISTS `takehome` VARCHAR(255) DEFAULT NULL
             ]])
         end
 
