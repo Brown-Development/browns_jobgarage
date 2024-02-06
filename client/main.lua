@@ -334,13 +334,13 @@ function SyncMarkers(job)
     Citizen.CreateThread(function()
         while thisJob == job do 
             Citizen.Wait(0)
-            DrawMarker(36, table.unpack({garage[job].location.coords}), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.5, 0.5, 154, 154, 154, 200, true, false, 2, true, nil, nil, false)
+            DrawMarker(36, table.unpack({garage[job].location.coords}), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.5, 0.5, garage[job].markerColors[1], garage[job].markerColors[2], garage[job].markerColors[3], 200, true, false, 2, true, nil, nil, false)
             if garage[job].takehome.enable then
-                DrawMarker(30, table.unpack({garage[job].takehome.locations.menu}), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.5, 0.5, 154, 154, 154, 200, true, false, 2, true, nil, nil, false)
+                DrawMarker(30, table.unpack({garage[job].takehome.locations.menu}), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.5, 0.5, garage[job].markerColors[1], garage[job].markerColors[2], garage[job].markerColors[3], 200, true, false, 2, true, nil, nil, false)
             end
             if garage[job].garage.enable then 
-                DrawMarker(24, table.unpack({garage[job].garage.store}), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 154, 154, 154, 200, true, false, 2, true, nil, nil, false)
-                DrawMarker(1, table.unpack({garage[job].garage.pull}), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 154, 154, 154, 200, false, false, 2, false, nil, nil, false)
+                DrawMarker(24, table.unpack({garage[job].garage.store}), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, garage[job].markerColors[1], garage[job].markerColors[2], garage[job].markerColors[3], 200, true, false, 2, true, nil, nil, false)
+                DrawMarker(1, table.unpack({garage[job].garage.pull}), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, garage[job].markerColors[1], garage[job].markerColors[2], garage[job].markerColors[3], 200, false, false, 2, false, nil, nil, false)
             end
         end
     end)
