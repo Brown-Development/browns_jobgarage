@@ -59,3 +59,19 @@ function getPlayerName(identifier, player)
         return player.PlayerData.charinfo.firstname .. " " .. player.PlayerData.charinfo.lastname 
     end
 end
+
+function OnJobUpdate()
+    if settings.framework == 'esx' then 
+        return 'esx:setJob'
+    elseif settings.framework == 'qb-core' then 
+        return 'QBCore:Client:OnJobUpdate' 
+    end
+end
+
+function OnPlayerLoaded()
+    if settings.framework == 'esx' then 
+        return 'esx:playerLoaded'
+    elseif settings.framework == 'qb-core' then 
+        return 'QBCore:Client:OnPlayerLoaded'
+    end
+end
