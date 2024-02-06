@@ -279,3 +279,18 @@ lib.callback.register('browns:jg:server:IsOwned', function(source, plate)
     
     return true
 end)
+
+lib.callback.register('browns:jg:server:AwaitJobMessage', function(source)
+    local ply = getPlayer(source)
+    
+    if not ply then return false end  
+
+    local id = getId(ply)
+
+    local job, _ = getJobData(ply)
+
+    if not job then return false end 
+    
+    return job
+end)
+
