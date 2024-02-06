@@ -61,6 +61,8 @@ config.garages = {
             spawnCoords = vec4(403.4095, -1015.4006, 29.2996, 357.9582), -- where the vehicle will spawn once your finished selcting your vehicle
         },
 
+        markerColors = {154, 154, 154}, -- rgb color of the markers (you can use or similar for rgb color codes: https://htmlcolors.com/google-color-picker)
+
         customize = { -- vehicle customization options
             cosmetic = true, -- allow cosmetic customization of vehicles? (livery, extras, colors, etc.)
             performance = true -- allow performance customization of vehicles? (engine, turbo, suspension, etc.)
@@ -127,6 +129,20 @@ config.garages = {
 
     -- ['ambulance'] = { 
 
+    --     location = { 
+    --         coords = vec3(0, 0, 0), 
+    --         displayCoords = vec3(0, 0, 0), 
+    --         displayHeading = 0, 
+    --         spawnCoords = vec4(0, 0, 0, 0), 
+    --     },
+
+    --     markerColors = {0, 0, 0},
+
+    --     customize = { 
+    --         cosmetic = true, 
+    --         performance = true 
+    --     },
+
     --     garage = { 
     --         enable = true,
     --         store = vec3(0, 0, 0), 
@@ -137,29 +153,17 @@ config.garages = {
     --     takehome = { 
     --         enable = true, 
     --         grades = { 
-    --             ['5'] = true, 
     --             ['6'] = true, 
-    --             ['7'] = true, 
+    --             ['5'] = true,
+    --             ['4'] = true,
     --         },
     --         locations = {
-    --             menu = vec3(0, 0, 0), 
+    --             menu = vec3(0, 0, 0),
     --             ped = {
     --                 coords = vec4(0, 0, 0, 0), 
     --                 model = 'u_m_y_smugmech_01' 
     --             },
     --         }
-    --     },
-
-    --     customize = { 
-    --         cosmetic = true, 
-    --         performance = true 
-    --     },
-
-    --     location = { 
-    --         coords = vec3(0, 0, 0), 
-    --         displayCoords = vec3(0, 0, 0), 
-    --         displayHeading = 0, 
-    --         spawnCoords = vec4(0, 0, 0, 0),
     --     },
 
     --     vehicles = { 
