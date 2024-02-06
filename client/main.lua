@@ -22,6 +22,41 @@ local Materials = {
     ['Chrome'] = 5
 }
 
+local JobEvent = OnJobUpdate()
+local LoadEvent = OnPlayerLoaded()
+
+RegisterNetEvent(LoadEvent)
+AddEventHandler(LoadEvent, function(xPlayer)
+
+    Citizen.Wait(5000)
+
+    if settings.framework == 'esx' then CORE.PlayerData = xPlayer end
+
+    Citizen.CreateThread(function()
+        local job = false 
+
+        repeat 
+    
+            job = lib.callback.await('browns:jg:server:AwaitJobMessage', false) 
+    
+        until job ~= false
+    
+        thisJob = job 
+    
+        if garage[job] then SyncMarkers(thisJob) end
+    end)
+
+end)
+
+RegisterNetEvent(JobEvent)
+AddEventHandler(JobEvent, function(data)
+
+    thisJob = data.name 
+
+    if garage[thisJob] then SyncMarkers(thisJob) end
+
+end)
+
 AddEventHandler('onResourceStop', function() 
     if Vehicle then DeleteEntity(Vehicle) end 
 
@@ -32,17 +67,104 @@ AddEventHandler('onResourceStop', function()
 
 end)
 
-Citizen.CreateThread(function() 
+AddEventHandler('onResourceStart', function()
+
+    local job = false 
+
+    if cache.ped then 
+
+        Citizen.CreateThread(function()
+            repeat 
+        
+                job = lib.callback.await('browns:jg:server:AwaitJobMessage', false) 
+    
+            until job ~= false
+    
+            thisJob = job 
+    
+            if garage[job] then SyncMarkers(thisJob) end
+        end)
+
+    end
+
+end)
+
+Citizen.CreateThread(function()
     for k, v in pairs(garage) do 
         if type(v) ~= 'function' then 
-            lib.zones.box({
-                coords = v.location.coords,
-                size = vec3(2, 2, 2),
-                rotation = 0,
-                onEnter = function()
-                    lib.showTextUI('[E] - Open Job Garage', {
+            local model = GetHashKey(v.takehome.locations.ped.model)
+            if IsModelInCdimage(model) then 
+                RequestModel(model)
+                while not HasModelLoaded(model) do 
+                    Citizen.Wait(0)
+                end
+                local ped = CreatePed(0, model, table.unpack({v.takehome.locations.ped.coords}), false, false)
+                while not DoesEntityExist(ped) do 
+                    Citizen.Wait(0)
+                end
+                FreezeEntityPosition(ped, true)
+                SetEntityInvincible(ped, true)
+                SetBlockingOfNonTemporaryEvents(ped, true)
+            else
+                print('Can not load ped model:', v.takehome.locations.ped.model, "Job:", k)
+            end
+        end
+    end
+end)
+
+function SyncMarkers(job)
+    lib.zones.box({
+        coords = garage[job].location.coords,
+        size = vec3(2, 2, 2),
+        rotation = 0,
+        onEnter = function()
+            if thisJob == job then 
+                lib.showTextUI('[E] - Open Job Garage', {
+                    position = 'right-center',
+                    icon = {'fas', 'warehouse'},
+                    iconColor = '#FFFFFF',
+                    iconAnimation = 'bounce',
+                    style = { 
+                        borderRadius = 10,
+                        backgroundColor = '#000000',
+                        color = '#FFFFFF'
+                    }
+                })
+            end
+            Citizen.CreateThread(function()
+                Citizen.Wait(200) 
+                while thisJob == job do 
+                    Citizen.Wait(0)
+                    local bool, str = lib.isTextUIOpen() 
+                    if bool and str == '[E] - Open Job Garage' then 
+                        if IsControlJustPressed(0, 46) then 
+                            lib.hideTextUI()
+                            OpenMenu(job) 
+                            break 
+                        end
+                    else
+                        break 
+                    end
+                end
+            end)
+        end,
+        onExit = function()
+            local bool, str = lib.isTextUIOpen() 
+            if bool and str == '[E] - Open Job Garage' then 
+                lib.hideTextUI()
+            end
+        end
+    })
+    if garage[job].takehome.enable then 
+        lib.zones.box({
+            coords = garage[job].takehome.locations.menu,
+            size = vec3(2, 2, 2),
+            rotation = 0,
+            onEnter = function()
+                if thisJob == job then 
+                    lib.showTextUI('[E] - Issue Take Home Vehicle', {
                         position = 'right-center',
-                        icon = {'fas', 'warehouse'},
+                        icon = {'fas', 'car'},
                         iconColor = '#FFFFFF',
                         iconAnimation = 'bounce',
                         style = { 
@@ -51,15 +173,104 @@ Citizen.CreateThread(function()
                             color = '#FFFFFF'
                         }
                     })
+                end
+                Citizen.CreateThread(function()
+                    Citizen.Wait(200) 
+                    while thisJob == job do 
+                        Citizen.Wait(0)
+                        local bool, str = lib.isTextUIOpen() 
+                        if bool and str == '[E] - Issue Take Home Vehicle' then 
+                            if IsControlJustPressed(0, 46) then 
+                                lib.hideTextUI()
+                                OpenThMenu(job) 
+                                break 
+                            end
+                        else
+                            break 
+                        end
+                    end
+                end)
+            end,
+            onExit = function()
+                local bool, str = lib.isTextUIOpen() 
+                if bool and str == '[E] - Issue Take Home Vehicle' then 
+                    lib.hideTextUI()
+                end
+            end
+        })
+        local x, y, z, hh = table.unpack(garage[job].takehome.locations.ped.coords)
+        lib.zones.box({
+            coords = vec3(x, y, z),
+            size = vec3(3, 3, 3),
+            rotation = 0,
+            onEnter = function()
+                if thisJob == job then 
+                    lib.showTextUI('[E] - View Issued Takehome Vehicles', {
+                        position = 'right-center',
+                        icon = {'fas', 'car'},
+                        iconColor = '#FFFFFF',
+                        iconAnimation = 'bounce',
+                        style = { 
+                            borderRadius = 10,
+                            backgroundColor = '#000000',
+                            color = '#FFFFFF'
+                        }
+                    })
+                end
+                Citizen.CreateThread(function()
+                    Citizen.Wait(200) 
+                    while thisJob == job do 
+                        Citizen.Wait(0)
+                        local bool, str = lib.isTextUIOpen() 
+                        if bool and str == '[E] - View Issued Takehome Vehicles' then 
+                            if IsControlJustPressed(0, 46) then 
+                                lib.hideTextUI()
+                                ViewThMenu(job) 
+                                break 
+                            end
+                        else
+                            break 
+                        end
+                    end
+                end)
+            end,
+            onExit = function()
+                local bool, str = lib.isTextUIOpen() 
+                if bool and str == '[E] - View Issued Takehome Vehicles' then 
+                    lib.hideTextUI()
+                end
+            end
+        })
+    end
+    if garage[job].garage.enable then 
+        lib.zones.box({
+            coords = garage[job].garage.store,
+            size = vec3(4, 4, 4),
+            rotation = 0,
+            onEnter = function()
+                if IsPedInAnyVehicle(cache.ped, false) and GetPedInVehicleSeat(GetVehiclePedIsIn(cache.ped, false), -1) == cache.ped then 
+                    if thisJob == job then 
+                        lib.showTextUI('[E] - Store Job Vehicle', {
+                            position = 'right-center',
+                            icon = {'fas', 'car'},
+                            iconColor = '#FFFFFF',
+                            iconAnimation = 'bounce',
+                            style = { 
+                                borderRadius = 10,
+                                backgroundColor = '#000000',
+                                color = '#FFFFFF'
+                            }
+                        })
+                    end
                     Citizen.CreateThread(function()
                         Citizen.Wait(200) 
-                        while true do 
+                        while thisJob == job do 
                             Citizen.Wait(0)
                             local bool, str = lib.isTextUIOpen() 
-                            if bool and str == '[E] - Open Job Garage' then 
+                            if bool and str == '[E] - Store Job Vehicle' then 
                                 if IsControlJustPressed(0, 46) then 
                                     lib.hideTextUI()
-                                    OpenMenu(k) 
+                                    StoreVehicle(job)
                                     break 
                                 end
                             else
@@ -67,21 +278,22 @@ Citizen.CreateThread(function()
                             end
                         end
                     end)
-                end,
-                onExit = function()
-                    local bool, str = lib.isTextUIOpen() 
-                    if bool and str == '[E] - Open Job Garage' then 
-                        lib.hideTextUI()
-                    end
                 end
-            })
-            if v.takehome.enable then 
-                lib.zones.box({
-                    coords = v.takehome.locations.menu,
-                    size = vec3(2, 2, 2),
-                    rotation = 0,
-                    onEnter = function()
-                        lib.showTextUI('[E] - Issue Take Home Vehicle', {
+            end,
+            onExit = function()
+                local bool, str = lib.isTextUIOpen() 
+                if bool and str == '[E] - Store Job Vehicle' then 
+                    lib.hideTextUI()
+                end
+            end
+        })
+        lib.zones.sphere({
+            coords = garage[job].garage.pull,
+            radius = 2,
+            onEnter = function()
+                if not IsPedInAnyVehicle(cache.ped, false) then 
+                    if thisJob == job then 
+                        lib.showTextUI('[E] - Retrieve Job Vehicle', {
                             position = 'right-center',
                             icon = {'fas', 'car'},
                             iconColor = '#FFFFFF',
@@ -92,189 +304,47 @@ Citizen.CreateThread(function()
                                 color = '#FFFFFF'
                             }
                         })
-                        Citizen.CreateThread(function()
-                            Citizen.Wait(200) 
-                            while true do 
-                                Citizen.Wait(0)
-                                local bool, str = lib.isTextUIOpen() 
-                                if bool and str == '[E] - Issue Take Home Vehicle' then 
-                                    if IsControlJustPressed(0, 46) then 
-                                        lib.hideTextUI()
-                                        OpenThMenu(k) 
-                                        break 
-                                    end
-                                else
+                    end
+                    Citizen.CreateThread(function()
+                        Citizen.Wait(200) 
+                        while thisJob == job do 
+                            Citizen.Wait(0)
+                            local bool, str = lib.isTextUIOpen() 
+                            if bool and str == '[E] - Retrieve Job Vehicle' then 
+                                if IsControlJustPressed(0, 46) then 
+                                    lib.hideTextUI()
+                                    PullVehicle(job)
                                     break 
                                 end
+                            else
+                                break 
                             end
-                        end)
-                    end,
-                    onExit = function()
-                        local bool, str = lib.isTextUIOpen() 
-                        if bool and str == '[E] - Issue Take Home Vehicle' then 
-                            lib.hideTextUI()
                         end
-                    end
-                })
-                local x, y, z, hh = table.unpack(v.takehome.locations.ped.coords)
-                lib.zones.box({
-                    coords = vec3(x, y, z),
-                    size = vec3(3, 3, 3),
-                    rotation = 0,
-                    onEnter = function()
-                        lib.showTextUI('[E] - View Issued Takehome Vehicles', {
-                            position = 'right-center',
-                            icon = {'fas', 'car'},
-                            iconColor = '#FFFFFF',
-                            iconAnimation = 'bounce',
-                            style = { 
-                                borderRadius = 10,
-                                backgroundColor = '#000000',
-                                color = '#FFFFFF'
-                            }
-                        })
-                        Citizen.CreateThread(function()
-                            Citizen.Wait(200) 
-                            while true do 
-                                Citizen.Wait(0)
-                                local bool, str = lib.isTextUIOpen() 
-                                if bool and str == '[E] - View Issued Takehome Vehicles' then 
-                                    if IsControlJustPressed(0, 46) then 
-                                        lib.hideTextUI()
-                                        ViewThMenu(k) 
-                                        break 
-                                    end
-                                else
-                                    break 
-                                end
-                            end
-                        end)
-                    end,
-                    onExit = function()
-                        local bool, str = lib.isTextUIOpen() 
-                        if bool and str == '[E] - View Issued Takehome Vehicles' then 
-                            lib.hideTextUI()
-                        end
-                    end
-                })
-                local model = GetHashKey(v.takehome.locations.ped.model)
-                if IsModelInCdimage(model) then 
-                    RequestModel(model)
-                    while not HasModelLoaded(model) do 
-                        Citizen.Wait(0)
-                    end
-                    local ped = CreatePed(0, model, table.unpack({v.takehome.locations.ped.coords}), false, false)
-                    while not DoesEntityExist(ped) do 
-                        Citizen.Wait(0)
-                    end
-                    FreezeEntityPosition(ped, true)
-                    SetEntityInvincible(ped, true)
-                    SetBlockingOfNonTemporaryEvents(ped, true)
-                else
-                    print('Can not load ped model:', v.takehome.locations.ped.model)
+                    end)
+                end
+            end,
+            onExit = function()
+                local bool, str = lib.isTextUIOpen() 
+                if bool and str == '[E] - Retrieve Job Vehicle' then 
+                    lib.hideTextUI()
                 end
             end
-            if v.garage.enable then 
-                lib.zones.box({
-                    coords = v.garage.store,
-                    size = vec3(4, 4, 4),
-                    rotation = 0,
-                    onEnter = function()
-                        if IsPedInAnyVehicle(cache.ped, false) and GetPedInVehicleSeat(GetVehiclePedIsIn(cache.ped, false), -1) == cache.ped then 
-                            lib.showTextUI('[E] - Store Job Vehicle', {
-                                position = 'right-center',
-                                icon = {'fas', 'car'},
-                                iconColor = '#FFFFFF',
-                                iconAnimation = 'bounce',
-                                style = { 
-                                    borderRadius = 10,
-                                    backgroundColor = '#000000',
-                                    color = '#FFFFFF'
-                                }
-                            })
-                            Citizen.CreateThread(function()
-                                Citizen.Wait(200) 
-                                while true do 
-                                    Citizen.Wait(0)
-                                    local bool, str = lib.isTextUIOpen() 
-                                    if bool and str == '[E] - Store Job Vehicle' then 
-                                        if IsControlJustPressed(0, 46) then 
-                                            lib.hideTextUI()
-                                            StoreVehicle(k)
-                                            break 
-                                        end
-                                    else
-                                        break 
-                                    end
-                                end
-                            end)
-                        end
-                    end,
-                    onExit = function()
-                        local bool, str = lib.isTextUIOpen() 
-                        if bool and str == '[E] - Store Job Vehicle' then 
-                            lib.hideTextUI()
-                        end
-                    end
-                })
-                lib.zones.sphere({
-                    coords = v.garage.pull,
-                    radius = 2,
-                    onEnter = function()
-                        if not IsPedInAnyVehicle(cache.ped, false) then 
-                            lib.showTextUI('[E] - Retrieve Job Vehicle', {
-                                position = 'right-center',
-                                icon = {'fas', 'car'},
-                                iconColor = '#FFFFFF',
-                                iconAnimation = 'bounce',
-                                style = { 
-                                    borderRadius = 10,
-                                    backgroundColor = '#000000',
-                                    color = '#FFFFFF'
-                                }
-                            })
-                            Citizen.CreateThread(function()
-                                Citizen.Wait(200) 
-                                while true do 
-                                    Citizen.Wait(0)
-                                    local bool, str = lib.isTextUIOpen() 
-                                    if bool and str == '[E] - Retrieve Job Vehicle' then 
-                                        if IsControlJustPressed(0, 46) then 
-                                            lib.hideTextUI()
-                                            PullVehicle(k)
-                                            break 
-                                        end
-                                    else
-                                        break 
-                                    end
-                                end
-                            end)
-                        end
-                    end,
-                    onExit = function()
-                        local bool, str = lib.isTextUIOpen() 
-                        if bool and str == '[E] - Retrieve Job Vehicle' then 
-                            lib.hideTextUI()
-                        end
-                    end
-                })
-            end
-            Citizen.CreateThread(function()
-                while true do 
-                    Citizen.Wait(0)
-                    DrawMarker(36, table.unpack({v.location.coords}), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.5, 0.5, 154, 154, 154, 200, true, false, 2, true, nil, nil, false)
-                    if v.takehome.enable then
-                        DrawMarker(30, table.unpack({v.takehome.locations.menu}), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.5, 0.5, 154, 154, 154, 200, true, false, 2, true, nil, nil, false)
-                    end
-                    if v.garage.enable then 
-                        DrawMarker(24, table.unpack({v.garage.store}), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 154, 154, 154, 200, true, false, 2, true, nil, nil, false)
-                        DrawMarker(1, table.unpack({v.garage.pull}), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 154, 154, 154, 200, false, false, 2, false, nil, nil, false)
-                    end
-                end
-            end)
-        end
+        })
     end
-end)
+    Citizen.CreateThread(function()
+        while thisJob == job do 
+            Citizen.Wait(0)
+            DrawMarker(36, table.unpack({garage[job].location.coords}), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.5, 0.5, 154, 154, 154, 200, true, false, 2, true, nil, nil, false)
+            if garage[job].takehome.enable then
+                DrawMarker(30, table.unpack({garage[job].takehome.locations.menu}), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.5, 0.5, 0.5, 154, 154, 154, 200, true, false, 2, true, nil, nil, false)
+            end
+            if garage[job].garage.enable then 
+                DrawMarker(24, table.unpack({garage[job].garage.store}), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 154, 154, 154, 200, true, false, 2, true, nil, nil, false)
+                DrawMarker(1, table.unpack({garage[job].garage.pull}), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 154, 154, 154, 200, false, false, 2, false, nil, nil, false)
+            end
+        end
+    end)
+end
 
 function StoreVehicle(name)
 
@@ -383,6 +453,7 @@ function OpenMenu(name)
     
         if job ~= name then 
             settings.notify('Job Garage', 'You can not access this', 'error', 5000)
+            Busy = false
             return
         end
     
@@ -435,6 +506,7 @@ function OpenMenu(name)
     
         if not vehicles[1] then
             settings.notify('Job Garage', 'There are no vehicles that you can access', 'error', 5000)
+            Busy = false
             return 
         end
     
@@ -553,8 +625,6 @@ function ViewThMenu(name)
                     })
 
                     thisModel = data.model 
-
-                    thisJob = name
 
                     
                     local model = GetHashKey(data.model)
@@ -983,7 +1053,6 @@ function ResetAll()
     thisModel = nil
     PrimaryMat = 'Metallic'
     SecondaryMat = 'Metallic'
-    thisJob = nil
 end
 
 function ClearCache()
